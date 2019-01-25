@@ -1,4 +1,4 @@
 # Don't check auto-generated stuff into git
-input/
-output/
+@INPUTS/
+@OUTPUTS/
 node_modules/

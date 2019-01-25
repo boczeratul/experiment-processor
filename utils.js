@@ -1,5 +1,8 @@
-const fs = require('fs');
-const nodeGlob = require('glob');
+import fs from 'fs';
+import nodeGlob from 'glob';
+
+const animateProgress = require('./helpers/progress');
+const addCheckmark = require('./helpers/checkmark');
 
 export const readFile = fileName =>
   new Promise((resolve, reject) => {
@@ -25,3 +28,17 @@ export const glob = pattern =>
       (error, value) => (error ? reject(error) : resolve(value)),
     );
   });
+
+// Progress Logger
+export const task = (message) => {
+  const progress = animateProgress(message);
+  process.stdout.write(message);
+
+  return (error) => {
+    if (error) {
+      process.stderr.write(error);
+    }
+    clearTimeout(progress);
+    return addCheckmark(() => process.stdout.write('\n'));
+  };
+};
