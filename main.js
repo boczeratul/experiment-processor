@@ -5,6 +5,7 @@ import { glob } from './utils';
 import checkmark from './helpers/checkmark';
 import xmark from './helpers/xmark';
 
+let totalCount = 0;
 const completeData = {
   Ch1: {
     '0.1-0.2': {
@@ -152,6 +153,7 @@ const processFile = (file) => {
     'State #1 to #2': formatCells(lines[24]),
     'State #2 to #1': formatCells(lines[25]),
   });
+  totalCount += 1;
 };
 
 glob('@INPUTS/**/*.txt')
@@ -168,4 +170,6 @@ glob('@INPUTS/**/*.txt')
 
     const completeFormatted = JSON.stringify(completeData, null, 2);
     writeFileSync('@OUTPUTS/complete.txt', completeFormatted.replace(/\\/g, ''), { flag: 'w+' });
+
+    process.stdout.write(`\nProcessed ${totalCount} files`);
   });
