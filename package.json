@@ -1,0 +1,29 @@
+{
+  "name": "experiment-processor",
+  "version": "0.0.1",
+  "description": "Experiment data postprocessor",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dexon-foundation/explorer-webapp.git"
+  },
+  "engines": {
+    "npm": ">=5",
+    "node": ">=8"
+  },
+  "author": "Hsuan Lee",
+  "license": "MIT",
+  "scripts": {
+    "start": "node run.js"
+  },
+  "dependencies": {
+    "@cobinhood/eslint-config-cobinhood": "0.0.4",
+    "babel-eslint": "8.2.3",
+    "eslint": "4.19.1",
+    "eslint-plugin-compat": "^2.4.0",
+    "eslint-plugin-flowtype": "^2.46.3",
+    "eslint-plugin-import": "2.12.0",
+    "eslint-plugin-jsx-a11y": "6.0.3",
+    "eslint-plugin-react": "7.9.1",
+    "glob": "^7.1.2"
+  }
+}
