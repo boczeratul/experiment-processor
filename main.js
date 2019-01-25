@@ -92,7 +92,7 @@ const allZero = (row) => {
 };
 
 const formatCells = row =>
-  `=SPLIT("${row.split(':\t')[1].split('\t').join(',')}", ",")`;
+  `=TRANSPOSE(SPLIT("${row.split(':\t')[1].split('\t').join(',')}", ","))`;
 
 const processFile = (file) => {
   printFile(file);
