@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, copyFileSync, mkdirSync } from 'fs';
 import { sync as rmdirSync } from 'rimraf';
 
 import { glob } from './utils';
@@ -74,15 +74,17 @@ const printFile = file =>
 const printStep = step =>
   print(`\n  ${step}`);
 
-const discardFile = (file, reason) => {
+const discardFile = (file, dest, reason) => {
   print(` - ${reason}`);
   xmark();
+  copyFileSync(file, dest, { flag: 'w+' });
 };
 
 const manualCheck = (file, data) => {
   print(' - manual check');
   checkmark();
-  writeFileSync(file.replace('INPUT', 'OUTPUT'), data, { flag: 'w+' });
+  const [, channel, serial] = file.split('/');
+  writeFileSync(`@OUTPUTS/${channel}/unknown/${serial}`, data, { flag: 'w+' });
 };
 
 const allZero = (row) => {
@@ -97,7 +99,7 @@ const formatCells = row =>
 const processFile = (file) => {
   printFile(file);
 
-  const channel = file.split('/')[1];
+  const [, channel, serial] = file.split('/');
   const data = readFileSync(file).toString('utf8');
   const lines = data.split('\n');
 
@@ -105,7 +107,7 @@ const processFile = (file) => {
   printStep('Checking file content');
 
   if (!lines) {
-    return discardFile(file, 'invalid file or empty file');
+    return discardFile(file, `@OUTPUTS/${channel}/0-state/${serial}`, 'invalid file or empty file');
   }
 
   checkmark();
@@ -114,7 +116,7 @@ const processFile = (file) => {
   printStep('Checking dwells');
 
   if (!lines[4] || !lines[5]) {
-    return discardFile(file, 'cannot identify dwells');
+    return discardFile(file, `@OUTPUTS/${channel}/0-state/${serial}`, 'cannot identify dwells');
   }
 
   if (lines[6] !== '') {
@@ -122,7 +124,7 @@ const processFile = (file) => {
       return manualCheck(file, data);
     }
 
-    return discardFile(file, 'too many states');
+    return discardFile(file, `@OUTPUTS/${channel}/3-state/${serial}`, 'too many states');
   }
 
   const dwells = Math.min(
@@ -131,7 +133,7 @@ const processFile = (file) => {
   );
 
   if (dwells < 2 || dwells > 7) {
-    return discardFile(file, `dwells out of range (${dwells})`);
+    return discardFile(file, `@OUTPUTS/${channel}/2-state/invalid-dwells/${serial}`, `dwells out of range (${dwells})`);
   }
 
   checkmark();
@@ -142,17 +144,20 @@ const processFile = (file) => {
   const distance = Number(lines[20].split('\t')[0]);
 
   if (distance < 0.1 || distance > 0.4) {
-    return discardFile(file, `distance out of range (${distance})`);
+    return discardFile(file, `@OUTPUTS/${channel}/2-state/invalid-distance/${serial}`, `distance out of range (${distance})`);
   }
 
   checkmark();
 
-  completeData[channel][distance < 0.2 ? '0.1-0.2' : '0.2-0.4'][dwells].push({
+  const distanceGroup = distance < 0.2 ? '0.1-0.2' : '0.2-0.4';
+  completeData[channel][distanceGroup][dwells].push({
     dwells,
     distance,
     'State #1 to #2': formatCells(lines[24]),
     'State #2 to #1': formatCells(lines[25]),
   });
+
+  copyFileSync(file, `@OUTPUTS/${channel}/2-state/${distanceGroup}/${dwells}/${serial}`, { flag: 'w+' });
   totalCount += 1;
 };
 
@@ -162,9 +167,23 @@ glob('@INPUTS/**/*.txt')
 
     rmdirSync('@OUTPUTS');
     mkdirSync('@OUTPUTS');
-    mkdirSync('@OUTPUTS/Ch1');
-    mkdirSync('@OUTPUTS/Ch2');
-    mkdirSync('@OUTPUTS/Ch3');
+    ['Ch1', 'Ch2', 'Ch3']
+      .forEach((channel) => {
+        mkdirSync(`@OUTPUTS/${channel}`);
+        mkdirSync(`@OUTPUTS/${channel}/0-state`);
+        mkdirSync(`@OUTPUTS/${channel}/3-state`);
+        mkdirSync(`@OUTPUTS/${channel}/unknown`);
+        mkdirSync(`@OUTPUTS/${channel}/2-state`);
+        mkdirSync(`@OUTPUTS/${channel}/2-state/invalid-dwells`);
+        mkdirSync(`@OUTPUTS/${channel}/2-state/invalid-distance`);
+        mkdirSync(`@OUTPUTS/${channel}/2-state/0.1-0.2`);
+        mkdirSync(`@OUTPUTS/${channel}/2-state/0.2-0.4`);
+        [2, 3, 4, 5, 6, 7]
+          .forEach((dwells) => {
+            mkdirSync(`@OUTPUTS/${channel}/2-state/0.1-0.2/${dwells}`);
+            mkdirSync(`@OUTPUTS/${channel}/2-state/0.2-0.4/${dwells}`);
+          });
+      });
 
     files.forEach(processFile);
 
