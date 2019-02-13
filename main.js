@@ -9,6 +9,7 @@ let totalCount = 0;
 const completeData = {
   Ch1: {
     '0.1-0.2': {
+      1: [],
       2: [],
       3: [],
       4: [],
@@ -17,6 +18,7 @@ const completeData = {
       7: [],
     },
     '0.2-0.4': {
+      1: [],
       2: [],
       3: [],
       4: [],
@@ -27,6 +29,7 @@ const completeData = {
   },
   Ch2: {
     '0.1-0.2': {
+      1: [],
       2: [],
       3: [],
       4: [],
@@ -35,6 +38,7 @@ const completeData = {
       7: [],
     },
     '0.2-0.4': {
+      1: [],
       2: [],
       3: [],
       4: [],
@@ -45,6 +49,7 @@ const completeData = {
   },
   Ch3: {
     '0.1-0.2': {
+      1: [],
       2: [],
       3: [],
       4: [],
@@ -53,6 +58,7 @@ const completeData = {
       7: [],
     },
     '0.2-0.4': {
+      1: [],
       2: [],
       3: [],
       4: [],
@@ -132,7 +138,7 @@ const processFile = (file) => {
     Number(lines[5].split('\t')[0]),
   );
 
-  if (dwells < 2 || dwells > 7) {
+  if (dwells < 1 || dwells > 7) {
     return discardFile(file, `@OUTPUTS/${channel}/2-state/invalid-dwells/${serial}`, `dwells out of range (${dwells})`);
   }
 
@@ -178,7 +184,7 @@ glob('@INPUTS/**/*.txt')
         mkdirSync(`@OUTPUTS/${channel}/2-state/invalid-distance`);
         mkdirSync(`@OUTPUTS/${channel}/2-state/0.1-0.2`);
         mkdirSync(`@OUTPUTS/${channel}/2-state/0.2-0.4`);
-        [2, 3, 4, 5, 6, 7]
+        [1, 2, 3, 4, 5, 6, 7]
           .forEach((dwells) => {
             mkdirSync(`@OUTPUTS/${channel}/2-state/0.1-0.2/${dwells}`);
             mkdirSync(`@OUTPUTS/${channel}/2-state/0.2-0.4/${dwells}`);
